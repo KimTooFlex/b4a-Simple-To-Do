@@ -1,0 +1,139 @@
+﻿Build1=Default,kimtoo.todo
+File1=complete.png
+File2=frmHome.bal
+File3=frmManageTask.bal
+File4=transparent.png
+File5=wait.png
+FileGroup1=Default Group
+FileGroup2=Default Group
+FileGroup3=Default Group
+FileGroup4=Default Group
+FileGroup5=Default Group
+Group=Default Group
+IconFile=
+Library1=core
+Library2=json
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="5" android:targetSdkVersion="19"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~'End of default text.~\n~
+Module1=Starter
+Module2=ManageTask
+Module3=Storage
+NumberOfFiles=5
+NumberOfLibraries=2
+NumberOfModules=3
+Version=7.8
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: To-Do
+	#VersionCode: 1
+	#VersionName: demo
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: portrait
+	#CanInstallToExternalStorage: False
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: false
+#End Region
+
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+
+End Sub
+
+Sub Globals
+	'These global variables will be redeclared each time the activity is created.
+	'These variables can only be accessed from this module.
+
+ 
+	Private ListView1 As ListView
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	'Do not forget to load the layout file created with the visual designer. For example:
+	Activity.LoadLayout("frmHome")
+	ListView1.TwoLinesAndBitmap.Label.TextColor=Colors.DarkGray
+	
+	LoadData
+	
+
+End Sub
+
+Sub Activity_Resume
+	LoadData
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+  
+End Sub
+
+
+Sub btnMenu_Click
+	
+End Sub
+
+Sub ListView1_ItemClick (Position As Int, Value As Object)
+	
+End Sub
+
+Sub ListView1_ItemLongClick (Position As Int, Value As Object)
+	  Dim opt As List
+	  opt.Initialize2(Array As String("Toggle","Delete"))
+	  Dim Task As Map = Value
+	Dim r As Int =  InputList(opt,"",-1)
+	  
+	  If r==0 Then
+	  	      'toggle
+		    Task.Put("done", Not( Task.Get("done")))
+			Dim toJson As JSONGenerator
+	        toJson.Initialize(Task)
+		    Dim SavedTasks As List= Storage.LoadData
+		    SavedTasks.Set(Position,toJson.ToString)
+		    Storage.SaveData(SavedTasks)
+		    LoadData
+		else If r==1 Then
+			'delete 
+			ToastMessageShow("Deleteing...",False)
+	    	Dim SavedTasks As List= Storage.LoadData
+	    	SavedTasks.RemoveAt(Position)
+	    	Storage.SaveData(SavedTasks)
+	    	LoadData
+	End If
+	  
+	  
+End Sub
+
+Sub btnAdd_Click
+	 StartActivity(ManageTask)
+End Sub
+
+
+Sub LoadData
+	ListView1.Clear
+	 
+ Dim tastks As List =Storage.LoadData
+ 
+    For Each Json As String In tastks
+		Dim jsonCon As JSONParser
+		jsonCon.Initialize(Json)
+	   Dim T As Map = jsonCon.NextObject	   
+	   addTodoList(T.Get("name"),T.Get("desc"),T.Get("done"),T)	
+    Next
+	
+	
+	
+End Sub
+
+
+Sub addTodoList(Text As String,Description As String, done As Boolean,item As Map) 
+	Dim icon As String ="wait.png"
+	If done Then
+		icon="complete.png"
+	End If
+	ListView1.AddTwoLinesAndBitmap2(Text,Description,LoadBitmap(File.DirAssets,icon),item)
+		 
+End Sub
+
+
+
